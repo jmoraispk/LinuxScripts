@@ -11,7 +11,7 @@ chmod +x ./scripts/build
 ./scripts/clone_all
 
 cd $PATHTORAN/cmake_targets
-./build_oai --eNB --UE --gNB --nrUE -w SIMU
+./build_oai --eNB --UE --gNB --nrUE -w SIMU --build-lib all
 
 # To compile just the rfsim
 # cd $PATHTORAN/cmake_targets/ran_build/build
