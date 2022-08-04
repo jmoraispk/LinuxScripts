@@ -23,6 +23,10 @@ cd $PATHTORAN/cmake_targets
 # make lte-softmodem
 
 
+# ALWAYS RUN THIS FIRST:
+cd $PATHTORAN
+source oaienv
+
 # Run eNB
 cd $PATHTORAN/cmake_targets/
 sudo RFSIMULATOR=server ./ran_build/build/lte-softmodem -O ../ci- scripts/conf_files/enb.band7.tm1.25PRB.usrpb210.conf --noS1 -- nokrnmod 1 --rfsim
