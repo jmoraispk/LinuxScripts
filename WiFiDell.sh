@@ -1,12 +1,12 @@
 # Fixes Wifi issues with using Ubuntu 18.04 on Dell 9520 (has AX211 card)
 
 # Install dependencies
-sudo apt install -y flex bison
+sudo apt install -y flex bison build-essential git
 
 # Clone Repo and Build wifi backport-driver
 cd ~/Downloads
 git clone https://github.com/intel/backport-iwlwifi.git
-cd backport-iwlwifi/iwlwifi-stack-dev
+cd backport-iwlwifi/iwlwifi-stack-dev/
 sudo make defconfig-iwlwifi-public
 sudo make
 sudo make install
