@@ -1,1 +1,2 @@
-sudo apt-get install build-essential geany
+sudo apt-get install -y build-essential geany git
+
