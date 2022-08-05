@@ -136,9 +136,12 @@ sudo python3 ./core-network.py --type stop-basic --fqdn no --scenario 2
 
 
 
+sudo RFSIMULATOR=server ./ran_build/build/lte-softmodem -O ../ci-scripts/conf_files/enb.band7.tm1.25PRB.usrpb210.conf --noS1 --nokrnmod 1 --rfsim -d --telnetsrv --rfsimulator.options chanmod
+sudo ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-txgain 0 --ue-max-power 0 --ue-scan-carrier --nokrnmod 1 --noS1 --rfsim --rfsimulator.serveraddr 10.0.1.1
 
-
-
+# namespaces
+sudo ip netns add ue1
+sudo ip netns exec u1 <command>
 
 
 ################3
