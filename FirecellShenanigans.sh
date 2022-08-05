@@ -4,7 +4,66 @@ cd ~/Documents/firecellrd
 export PATHTOREPO=$(pwd)
 export PATHTORAN=$PATHTOREPO/components/RAN
 export PATHTO5GCN=$PATHTOREPO/components/CN
-export PATHTOEPC=$PATHTOREPO/components/CN/openair-epc
+export PATHTOEPC=$PATHTOREPO/components/CN/openair-5gcn
+export PATHTOFRD=$PATHTOREPO/fc-ue-Proxy
+
+##################3 PROXY for L2 SIM #######################
+cd $PATHTOREPO
+git clone https://gitlab.com/firecell/r-d/fc-ue-proxy.git
+make
+sudo ifconfig lo: 127.0.0.2 netmask 255.0.0.0 up
+
+# Start proxy whenever
+./proxy_testscript.py --num-ues 1 --mode=nr
+
+# CONFIGURATIONS TO DO AT THE BS
+<PATHTORAN>/ci-scripts/conf_files/episci/proxy_gnb.band78.sa.fr1.106PRB.usrpn310.conf
+
+AMF parameters:
+amf_ip_address
+ipv4 = "192.168.70.132"
+ipv6 = "192:168:30::17";
+active = "yes";
+preference = "ipv4";
+
+
+NETWORK_INTERFACES:
+NOTE: Assuming BOND0 as the physical interface name & CI_GNB_IP_ADDR the IP Address of this
+interface. Keep these according to the ifconfig output of your gNB server.
+
+GNB_INTERFACE_NAME_FOR_NG_AMF = "BOND0";
+GNB_IPV4_ADDRESS_FOR_NG_AMF = "CI_GNB_IP_ADDR";
+GNB_INTERFACE_NAME_FOR_NGU = "BOND0";
+GNB_IPV4_ADDRESS_FOR_NGU = "CI_GNB_IP_ADDR";
+GNB_PORT_FOR_NGU = 2152; # Spec 2152
+
+PLMN and Tracking Area Code:
+tracking_area_code = 0xa000;
+mcc = 208;
+mnc = 95;
+
+# CONFIGURATIONS TO DO AT THE UE
+<PATHTORAN>/ ci-scripts/conf_files/episci/proxy_nr-ue.nfapi.conf
+
+imsi = "208950000000031";
+key = "0C0A34601D4F07677303652C0462535B";
+opc= "63bfa50ee6523365ff14c1f45f88737d";
+dnn= "default";
+
+# CONFIGURATIOS FOR SYSTEM SIMULATION (paste the following in the config file)
+<PATHTORAN>/ci-scripts/conf_files/episci/proxy_gnb.band78.sa.fr1.106PRB.usrpn310.conf
+# IP Address, port numbers and Mode for System Simulator
+SSConfig = ({
+hostIp = "127.0.0.1"; #Host IP for System Simulator
+Sys_port = 7777; #Port Number for System Simulator Sys Port
+Srb_port = 7778; #Port Number for System Simulator Srb Port
+Vng_port = 7779; #Port Number for System Simulator
+Vng Port
+SSMode = 2; #SSMode: 0 - gNB ,
+1- SYS_PORT test ,
+2- Only SRB_PORT test
+});
+############################################################
 
 
 cd $PATHTOREPO
@@ -111,9 +170,10 @@ sudo docker logout
 route -n
 cd $PATHTO5GCN/docker-compose
 nano docker-compose-basic-nonrf.yaml
-
 # modify: 
+(in SMF)
 ● DEFAULT_DNS_IPV4_ADDRESS: 192.168.253.1 or 8.8.8.8
+(in AMF)
 ● SST_0=1
 ● SD_0=1
 ● OPERATOR_KEY=1006020f0a478bf6b699f15c062e42b3
@@ -121,6 +181,22 @@ nano docker-compose-basic-nonrf.yaml
 # Deploy 5G CN
 cd $PATHTO5GCN/docker-compose
 sudo python3 ./core-network.py --type start-basic --fqdn no --scenario 2
+
+# Check running containers
+docker ps
+
+# You should see something like this:
+CONTAINER ID   IMAGE                   COMMAND                  CREATED         STATUS                   PORTS                          NAMES
+8987279ed67d   ubuntu:bionic           "/bin/bash -c ' apt …"   2 minutes ago   Up 2 minutes                                            oai-ext-dn
+8885f5f47b53   oai-spgwu-tiny:latest   "/openair-spgwu-tiny…"   2 minutes ago   Up 2 minutes (healthy)   2152/udp, 8805/udp             oai-spgwu
+ed64d7fcc50b   oai-smf:latest          "/bin/bash /openair-…"   2 minutes ago   Up 2 minutes (healthy)   80/tcp, 9090/tcp, 8805/udp     oai-smf
+af653fb8e9cf   oai-amf:latest          "/bin/bash /openair-…"   2 minutes ago   Up 2 minutes (healthy)   80/tcp, 9090/tcp, 38412/sctp   oai-amf
+9f0327194872   oai-ausf:latest         "/bin/bash /openair-…"   2 minutes ago   Up 2 minutes (healthy)   80/tcp                         oai-ausf
+0a3d46c5d231   oai-udm:latest          "/bin/bash /openair-…"   2 minutes ago   Up 2 minutes (healthy)   80/tcp                         oai-udm
+3834fa873ae6   oai-udr:latest          "/bin/bash /openair-…"   2 minutes ago   Up 2 minutes (healthy)   80/tcp                         oai-udr
+4aef2e5b9ebc   mysql:5.7               "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes (healthy)   3306/tcp, 33060/tcp            mysql
+
+
 
 # if needed, get AMF and SP-GWU IPs (MAYBE THERES A SPACE BETWEEN RANGE and .NETWORK)
 sudo docker inspect --format="{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}" oai-amf
@@ -170,4 +246,27 @@ sudo ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.
 ################3
 ping -I oaitun_enb1 10.0.1.2  # (from eNB machine)
 ping -I oaitun_ue1 10.0.1.1   # (from UE machine)
+
+
+
+############################ Validate L2 SIM in noS1 mode ##############
+cd $PATHTOPROXY
+./proxy_testscript.py --num-ues 1 --mode=nr
+# Returns a few errors...
+
+
+# or individually
+cd $PATHTORAN/cmake_targets
+sudo -E taskset --cpu-list 1 ./ran_build/build/nr-softmodem -O ../ci-scripts/conf_files/episci/proxy_gnb.band78.sa.fr1.106PRB.usrpn310.conf --nfapi 2 --noS1 --emulate-l1 --log_config.global_log_options level,nocolor,time,thread_id --sa
+###### (libconfig couldnt be loaded!!)
+
+cd $PATHTOPROXY
+number_of_ues=1
+sudo -E ./build/proxy $number_of_ues --nr
+
+cd $PATHTORAN/cmake_targets
+sudo -E taskset --cpu-list 2 ./ran_build/build/nr-uesoftmodem -O ../ci-scripts/conf_files/episci/proxy_nr-ue.nfapi.conf --nokrnmod 1 --nfapi 5 --node-number 2 --emulate-l1 --log_config.global_log_options level,nocolor,time,thread_id --sa
+
+########################################################################
+
 
