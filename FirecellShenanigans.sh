@@ -99,7 +99,6 @@ sudo RFSIMULATOR=<SERVERIP> ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 2
 
 sudo RFSIMULATOR=10.0.1.1 ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-txgain 0 --ue-max-power 0 --ue-scan-carrier --nokrnmod 1 --noS1 --rfsim
 
-# RUN DIFFERENT NAME SPACES!!!!
 
 # Install wireshark
 sudo add-apt-repository ppa:wireshark-dev/stable
