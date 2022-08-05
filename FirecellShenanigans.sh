@@ -140,8 +140,28 @@ sudo RFSIMULATOR=server ./ran_build/build/lte-softmodem -O ../ci-scripts/conf_fi
 sudo ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-txgain 0 --ue-max-power 0 --ue-scan-carrier --nokrnmod 1 --noS1 --rfsim --rfsimulator.serveraddr 10.0.1.1
 
 # namespaces
-sudo ip netns add ue1
-sudo ip netns exec u1 <command>
+ue_id=1
+sudo ip netns add ue$ue_id
+sudo ip link add v-eth$ue_id type veth peer name v-ue$ue_id
+
+sudo ip addr add 10.201.1.1/24 dev v-eth$ue_id
+sudo ip link set v-eth$ue_id up
+sudo iptables -t nat -A POSTROUTING -s 10.201.1.0/255.255.255.0 -o IFACE_NAME -j MASQUERADE
+sudo iptables -A FORWARD -i IFACE_NAME -o v-eth$ue_id -j ACCEPT
+sudo iptables -A FORWARD -o IFACE_NAME -i v-eth$ue_id -j ACCEPT
+sudo ip netns exec ue1 ip link set dev lo up
+sudo ip netns exec ue1 ip addr add 10.201.1.2/24 dev v-ue$ue_id
+sudo ip netns exec ue1 ip link set v-ue$ue_id up
+sudo ip netns exec ue1 sudo -E RFSIMULATOR=10.201.1.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O $CNFPATH/ue.conf
+sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
+sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
+export RFSIMULATOR=server
+
+
+
+# Final commands
+sudo ip netns exec ue1 sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --noS1 --nokrnmod -O ue.conf
+sudo ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.band78.fr1.106PRB.usrpb210.conf
 
 
 ################3
