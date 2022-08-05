@@ -151,6 +151,9 @@ sudo iptables -A FORWARD -i IFACE_NAME -o v-eth$ue_id -j ACCEPT
 sudo iptables -A FORWARD -o IFACE_NAME -i v-eth$ue_id -j ACCEPT
 sudo ip netns exec ue1 ip link set dev lo up
 sudo ip netns exec ue1 ip addr add 10.201.1.2/24 dev v-ue$ue_id
+
+(error! --> Cannot find device "v-ue1")
+
 sudo ip netns exec ue1 ip link set v-ue$ue_id up
 sudo ip netns exec ue1 sudo -E RFSIMULATOR=10.201.1.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O $CNFPATH/ue.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
