@@ -224,13 +224,13 @@ sudo ip link set v-eth$ue_id up
 sudo iptables -t nat -A POSTROUTING -s 10.201.1.0/255.255.255.0 -o IFACE_NAME -j MASQUERADE
 sudo iptables -A FORWARD -i IFACE_NAME -o v-eth$ue_id -j ACCEPT
 sudo iptables -A FORWARD -o IFACE_NAME -i v-eth$ue_id -j ACCEPT
-sudo ip netns exec ue1 ip link set dev lo up
-sudo ip netns exec ue1 ip addr add 10.201.1.2/24 dev v-ue$ue_id
+sudo ip netns exec ue$ue_id ip link set dev lo up
+sudo ip netns exec ue$ue_id ip addr add 10.201.1.2/24 dev v-ue$ue_id
 
 (error! --> Cannot find device "v-ue1")
 
-sudo ip netns exec ue1 ip link set v-ue$ue_id up
-sudo ip netns exec ue1 sudo -E RFSIMULATOR=10.201.1.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O $CNFPATH/ue.conf
+sudo ip netns exec ue$ue_id ip link set v-ue$ue_id up
+sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O $CNFPATH/ue.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
 export RFSIMULATOR=server
@@ -238,7 +238,7 @@ export RFSIMULATOR=server
 
 
 # Final commands
-sudo ip netns exec ue1 sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --noS1 --nokrnmod -O ue.conf
+sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --noS1 --nokrnmod -O ue.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.band78.fr1.106PRB.usrpb210.conf
 
 
