@@ -237,9 +237,6 @@ sudo ip netns exec ue$ue_id ip addr add 10.201.1.2/24 dev v-ue$ue_id
 sudo ip netns exec ue$ue_id ip link set v-ue$ue_id up
 
 
-
-
-
 # Final commands
 sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --noS1 --nokrnmod -O ue.conf
 sudo RFSIMULATOR=server ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.band78.fr1.106PRB.usrpb210.conf
@@ -247,7 +244,7 @@ sudo RFSIMULATOR=server ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nok
 ################3
 ping -I oaitun_enb1 10.0.1.2  # (from eNB machine)
 ping -I oaitun_ue1 10.0.1.1   # (from UE machine)
-
+# Requires --nokrnmod, I think. 
 
 
 ############################ Validate L2 SIM in noS1 mode ##############
