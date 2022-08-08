@@ -1,5 +1,6 @@
 cd ~/Documents
 git clone https://gitlab.com/firecell/r-d/firecellrd.git
+
 cd ~/Documents/firecellrd
 export PATHTOREPO=$(pwd)
 export PATHTORAN=$PATHTOREPO/components/RAN
@@ -218,18 +219,19 @@ sudo ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-
 ue_id=1
 sudo ip netns add ue$ue_id
 sudo ip link add v-eth$ue_id type veth peer name v-ue$ue_id
+sudo ip link set v-ue$ue_id netns ue$ue_id
 
 sudo ip addr add 10.201.1.1/24 dev v-eth$ue_id
 sudo ip link set v-eth$ue_id up
-sudo iptables -t nat -A POSTROUTING -s 10.201.1.0/255.255.255.0 -o IFACE_NAME -j MASQUERADE
-sudo iptables -A FORWARD -i IFACE_NAME -o v-eth$ue_id -j ACCEPT
-sudo iptables -A FORWARD -o IFACE_NAME -i v-eth$ue_id -j ACCEPT
+export IFACE_NAME=enxa0cec8fd657b
+
+sudo iptables -t nat -A POSTROUTING -s 10.201.1.0/255.255.255.0 -o $IFACE_NAME -j MASQUERADE
+sudo iptables -A FORWARD -i $IFACE_NAME -o v-eth$ue_id -j ACCEPT
+sudo iptables -A FORWARD -o $IFACE_NAME -i v-eth$ue_id -j ACCEPT
 sudo ip netns exec ue$ue_id ip link set dev lo up
 sudo ip netns exec ue$ue_id ip addr add 10.201.1.2/24 dev v-ue$ue_id
-
-(error! --> Cannot find device "v-ue1")
-
 sudo ip netns exec ue$ue_id ip link set v-ue$ue_id up
+
 sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --nokrnmod -O $CNFPATH/ue.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
 sudo ./ran_build/build/nr-softmodem --rfsim --sa -d -O ../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf
