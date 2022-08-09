@@ -217,8 +217,6 @@ sudo RFSIMULATOR=server ./ran_build/build/lte-softmodem -O ../ci-scripts/conf_fi
 sudo ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-txgain 0 --ue-max-power 0 --ue-scan-carrier --nokrnmod 1 --noS1 --rfsim --rfsimulator.serveraddr 10.0.1.1
 
 
-
-
 # namespaces
 ue_id=1
 sudo ip netns add ue$ue_id
@@ -244,6 +242,14 @@ sudo ip netns exec ue$ue_id sudo ./ran_build/build/lte-uesoftmodem -C 2680000000
 # Final commands
 sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3619200000 --rfsim --sa --noS1 --nokrnmod -O ue.conf
 sudo RFSIMULATOR=server ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.band78.fr1.106PRB.usrpb210.conf
+
+# WORKING COMMANDS
+
+sudo RFSIMULATOR=server ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/gnb.band78.tm1.106PRB.usrpn300.conf --parallel-config PARALLEL_SINGLE_THREAD --rfsim --phy-test --nokrnmod 1
+sudo RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem --rfsim --phy-test --rrc_config_path .
+
+
+
 
 
 sudo ip netns exec ue$ue_id bash
@@ -273,10 +279,6 @@ sudo -E taskset --cpu-list 2 ./ran_build/build/nr-uesoftmodem -O ../ci-scripts/c
 
 ########################################################################
 
-
-
-sudo RFSIMULATOR=server ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/gnb.band78.tm1.106PRB.usrpn300.conf --parallel-config PARALLEL_SINGLE_THREAD --rfsim --phy-test --nokrnmod 1
-sudo RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem --rfsim --phy-test --rrc_config_path .
 
 
 
