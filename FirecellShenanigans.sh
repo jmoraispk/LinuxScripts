@@ -274,3 +274,9 @@ sudo -E taskset --cpu-list 2 ./ran_build/build/nr-uesoftmodem -O ../ci-scripts/c
 ########################################################################
 
 
+
+sudo RFSIMULATOR=server ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/gnb.band78.tm1.106PRB.usrpn300.conf --parallel-config PARALLEL_SINGLE_THREAD --rfsim --phy-test --nokrnmod 1
+sudo RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem --rfsim --phy-test --rrc_config_path .
+
+
+
