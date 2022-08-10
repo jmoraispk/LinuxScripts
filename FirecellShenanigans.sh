@@ -211,7 +211,7 @@ sudo python3 ./core-network.py --type stop-basic --fqdn no --scenario 2
 
 
 
-# MY last commands IN 4G, without namespaces
+# MY last commands IN 4G, without namespaces (PDCP data request failed!)
 cd $PATHTORAN/cmake_targets/
 sudo RFSIMULATOR=server ./ran_build/build/lte-softmodem -O ../ci-scripts/conf_files/enb.band7.tm1.25PRB.usrpb210.conf --noS1 --nokrnmod 1 --rfsim -d --telnetsrv --rfsimulator.options chanmod
 sudo ./ran_build/build/lte-uesoftmodem -C 2680000000 -r 25 --ue-rxgain 120 --ue-txgain 0 --ue-max-power 0 --ue-scan-carrier --nokrnmod 1 --noS1 --rfsim --rfsimulator.serveraddr 10.0.1.1
@@ -244,7 +244,7 @@ sudo ip netns exec ue$ue_id sudo -E RFSIMULATOR=10.201.1.1 ./ran_build/build/nr-
 sudo RFSIMULATOR=server ./ran_build/build/nr-softmodem --rfsim --sa --noS1 --nokrnmod -d -O gnb.sa.band78.fr1.106PRB.usrpb210.conf
 
 # WORKING COMMANDS
-
+cd $PATHTORAN/cmake_targets/ran_build/build
 sudo RFSIMULATOR=server ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/gnb.band78.tm1.106PRB.usrpn300.conf --parallel-config PARALLEL_SINGLE_THREAD --rfsim --phy-test --nokrnmod 1
 sudo RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem --rfsim --phy-test --rrc_config_path .
 
